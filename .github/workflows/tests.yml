@@ -1,11 +1,14 @@
 name: Installer tests
 on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
 jobs:
   test:
     strategy:
       matrix:
         os: [windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

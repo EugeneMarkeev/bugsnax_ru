@@ -1,0 +1,32 @@
+name: Ошибка установки или озвучки
+description: Проблемы с установкой, удалением, голосами и совместимостью macOS
+title: "[Ошибка]: "
+body:
+  - type: dropdown
+    id: os
+    attributes:
+      label: Система
+      options:
+        - Windows
+        - macOS (Intel)
+        - macOS (Apple Silicon)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Версия мода и игры
+      placeholder: "Мод v0.1.0, Steam build ..."
+  - type: textarea
+    id: problem
+    attributes:
+      label: Что произошло
+      description: Укажите шаги, сцену или персонажа, ожидаемый и фактический результат.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Сообщение установщика
+      description: Вставьте сообщение об ошибке. Удалите из текста личные пути, если не хотите их публиковать.
+      render: text

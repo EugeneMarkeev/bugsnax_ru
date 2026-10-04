@@ -1,12 +1,18 @@
 # Bugsnax — русская озвучка
 
+[![Проверки установщиков](https://github.com/EugeneMarkeev/bugsnax_ru/actions/workflows/tests.yml/badge.svg)](https://github.com/EugeneMarkeev/bugsnax_ru/actions/workflows/tests.yml)
+
+**[Скачать озвучку для Windows и Mac](https://github.com/EugeneMarkeev/bugsnax_ru/releases/latest/download/Bugsnax-Russian-Voice-v0.1.0.zip)**
+· [Все релизы](https://github.com/EugeneMarkeev/bugsnax_ru/releases)
+· [Сообщить об ошибке](https://github.com/EugeneMarkeev/bugsnax_ru/issues/new/choose)
+
 Неофициальная частичная озвучка Qwen3-TTS: **2469 голосовых фрагментов,
 14 постоянных голосов персонажей**. Начальный набор — 723 фрагмента,
 продолжение — ещё 1746. Неозвученные диалоги и песни остаются в оригинале.
 
 ## Установка
 
-1. Скачайте **Bugsnax-Russian-Voice-v0.1.0.zip** из раздела Releases и распакуйте.
+1. [Скачайте архив озвучки](https://github.com/EugeneMarkeev/bugsnax_ru/releases/latest/download/Bugsnax-Russian-Voice-v0.1.0.zip) и распакуйте.
    Архивы **Source code** содержат только установщик, без озвучки.
 2. Закройте Bugsnax.
 3. Windows: дважды нажмите **Install.cmd**. Mac: **Install.command**.
