@@ -50,6 +50,37 @@ class InstallerContract:
         self.assertNotEqual(self.run_action('install').returncode,0)
         self.assert_original()
 
+    def prepare_previous_pack(self,backup=True):
+        rows=['name\toriginal_sha256\tpatched_sha256\tbytes']
+        for name,data in self.originals.items():
+            previous=b'old broken pack '+data
+            (self.audio/name).write_bytes(previous)
+            rows.append(f'{name}\t{sha(data)}\t{sha(previous)}\t{len(previous)}')
+            if backup:
+                saved=self.audio/'.bugsnax-russian-voice/backup'/name
+                saved.parent.mkdir(parents=True,exist_ok=True);saved.write_bytes(data)
+        (self.package/'previous-manifest.tsv').write_bytes(('\n'.join(rows)+'\n').encode())
+
+    def test_upgrade_preserves_original_backup(self):
+        self.prepare_previous_pack()
+        result=self.run_action('install')
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        for name,data in self.originals.items():
+            self.assertEqual((self.audio/name).read_bytes(),b'russian '+data)
+            self.assertEqual((self.audio/'.bugsnax-russian-voice/backup'/name).read_bytes(),data)
+        self.assertEqual(self.run_action('uninstall').returncode,0)
+        self.assert_original()
+
+    def test_previous_pack_without_backup_is_rejected(self):
+        self.prepare_previous_pack(backup=False)
+        self.assertNotEqual(self.run_action('install').returncode,0)
+        for name,data in self.originals.items():self.assertEqual((self.audio/name).read_bytes(),b'old broken pack '+data)
+
+    def test_uninstall_previous_pack(self):
+        self.prepare_previous_pack()
+        self.assertEqual(self.run_action('uninstall').returncode,0)
+        self.assert_original()
+
     def test_unknown_game_version_does_not_touch_other_banks(self):
         (self.audio/'GameAudio_Wambus.bank').write_bytes(b'new game version')
         self.assertNotEqual(self.run_action('install').returncode,0)
@@ -201,6 +232,31 @@ cp "$TEST_PACK_SOURCE" "$out"
         shutil.move(str(self.audio),nested);self.audio=nested
         self.assertEqual(self.run_action('install').returncode,0)
         self.assertEqual(self.run_action('uninstall').returncode,0)
+        self.assert_original()
+
+    def test_repair_real_pcm_headers_without_download(self):
+        from test_fsb5_layout import riff_bank
+        old=riff_bank(legacy=True);new=riff_bank()
+        current=['name\toriginal_sha256\tpatched_sha256\tbytes']
+        previous=[current[0]]
+        for name,data in self.originals.items():
+            (self.audio/name).write_bytes(old)
+            saved=self.audio/'.bugsnax-russian-voice/backup'/name
+            saved.parent.mkdir(parents=True,exist_ok=True);saved.write_bytes(data)
+            current.append(f'{name}\t{sha(data)}\t{sha(new)}\t{len(new)}')
+            previous.append(f'{name}\t{sha(data)}\t{sha(old)}\t{len(old)}')
+        (self.package/'manifest.tsv').write_bytes(('\n'.join(current)+'\n').encode())
+        (self.package/'previous-manifest.tsv').write_bytes(('\n'.join(previous)+'\n').encode())
+        shutil.rmtree(self.package/'payload')
+        for _ in range(2):
+            result=self.run_action('repair')
+            self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        for name in self.originals:self.assertEqual((self.audio/name).read_bytes(),new)
+        self.assertEqual(self.run_action('uninstall').returncode,0)
+        self.assert_original()
+
+    def test_repair_rejects_unmodified_game(self):
+        self.assertNotEqual(self.run_action('repair').returncode,0)
         self.assert_original()
 
     def test_shell_rollback(self):

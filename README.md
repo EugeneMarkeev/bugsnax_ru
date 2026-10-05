@@ -2,8 +2,8 @@
 
 [![Проверки установщиков](https://github.com/EugeneMarkeev/bugsnax_ru/actions/workflows/tests.yml/badge.svg)](https://github.com/EugeneMarkeev/bugsnax_ru/actions/workflows/tests.yml)
 
-**[Скачать маленький установщик для Windows и Mac](https://github.com/EugeneMarkeev/bugsnax_ru/releases/latest/download/Bugsnax-Installer-v0.1.1.zip)**
-· [Пакет озвучки отдельно](https://github.com/EugeneMarkeev/bugsnax_ru/releases/download/v0.1.1/Bugsnax-Sound-Pack-v0.1.0.zip)
+**[Скачать маленький установщик для Windows и Mac](https://github.com/EugeneMarkeev/bugsnax_ru/releases/latest/download/Bugsnax-Installer-v0.1.2.zip)**
+· [Пакет озвучки отдельно](https://github.com/EugeneMarkeev/bugsnax_ru/releases/download/v0.1.2/Bugsnax-Sound-Pack-v0.1.1.zip)
 · [Все релизы](https://github.com/EugeneMarkeev/bugsnax_ru/releases)
 · [Сообщить об ошибке](https://github.com/EugeneMarkeev/bugsnax_ru/issues/new/choose)
 
@@ -13,7 +13,19 @@
 
 ## Установка
 
-1. [Скачайте маленький установщик](https://github.com/EugeneMarkeev/bugsnax_ru/releases/latest/download/Bugsnax-Installer-v0.1.1.zip) и распакуйте.
+Если озвучка уже установлена на Mac и диалоги пищат:
+[скачайте маленькое исправление](https://github.com/EugeneMarkeev/bugsnax_ru/releases/download/v0.1.2/Bugsnax-Mac-Audio-Repair-v0.1.2.zip),
+распакуйте, закройте игру и запустите **Repair.command**. Оно исправит
+установленные банки локально, проверит итоговые SHA-256 и сохранит резервные
+копии оригиналов. Повторно скачивать звуковой пакет не требуется.
+Если Perl отсутствует в системе, используйте полный установщик ниже.
+
+**В v0.1.0–v0.1.1 найдена ошибка звуковых банков, вызывающая писк и искажения
+диалогов. Используйте v0.1.2 с новым пакетом звуков v0.1.1.** При обновлении
+закройте игру и запустите новый установщик: он заменит старые банки,
+сохранив резервную копию оригиналов. Старый ZIP звуков больше не подходит.
+
+1. [Скачайте маленький установщик](https://github.com/EugeneMarkeev/bugsnax_ru/releases/latest/download/Bugsnax-Installer-v0.1.2.zip) и распакуйте в новую папку.
 2. Закройте Bugsnax.
 3. Windows: дважды нажмите **Install.cmd**. Mac: **Install.command**.
    Установщик сам скачает пакет озвучки (около 1,3 ГБ), проверит его и распакует.
@@ -23,7 +35,7 @@
 
 Python, Qwen, Git и отдельная видеокарта для установки и игры не нужны.
 
-Для установки без интернета [скачайте пакет звуков отдельно](https://github.com/EugeneMarkeev/bugsnax_ru/releases/download/v0.1.1/Bugsnax-Sound-Pack-v0.1.0.zip)
+Для установки без интернета [скачайте пакет звуков отдельно](https://github.com/EugeneMarkeev/bugsnax_ru/releases/download/v0.1.2/Bugsnax-Sound-Pack-v0.1.1.zip)
 и положите ZIP рядом с `Install.cmd`/`Install.command` или в родительскую папку.
 Звуковой ZIP распаковывать вручную не нужно. При наличии ZIP установщик
 использует его вместо скачивания. Пакет одинаков для Windows и Mac.
@@ -33,9 +45,11 @@ Python, Qwen, Git и отдельная видеокарта для устано
 выбрать папку: Steam → Bugsnax → Управление → Просмотреть локальные файлы.
 Выберите папку Bugsnax, приложение Bugsnax.app или папку звуковых банков.
 
-macOS пока **экспериментальная**: установщик подготовлен, но воспроизведение
-на настоящем Mac ещё не проверялось. Он применит мод только при совпадении
-контрольных сумм оригинальных банков; несовместимые файлы не перезаписывает.
+macOS пока **экспериментальная**: пользователь обнаружил писк диалогов на Intel
+MacBook Pro 2019 в предыдущем пакете. Ошибка заголовков банков воспроизведена
+через FMOD Windows и исправлена в v0.1.2; повторная проверка звучания на
+настоящем Mac ещё нужна. Установщик проверяет контрольные суммы оригиналов
+или известного предыдущего пакета; неизвестные файлы не перезаписывает.
 Внутри `.app` поддерживается путь `Contents/Resources/Content/Audio/Build/Desktop`.
 Если звук хранится иначе, можно выбрать сам каталог `Desktop`.
 

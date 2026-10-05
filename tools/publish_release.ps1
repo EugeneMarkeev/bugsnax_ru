@@ -1,7 +1,7 @@
-param([string]$Repository='EugeneMarkeev/bugsnax_ru',[string]$Version='0.1.1')
+param([string]$Repository='EugeneMarkeev/bugsnax_ru',[string]$Version='0.1.2',[string]$SoundVersion='0.1.1')
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
-$assets=@((Join-Path $root "dist\Bugsnax-Installer-v$Version.zip"),(Join-Path $root 'dist\Bugsnax-Sound-Pack-v0.1.0.zip'),(Join-Path $root "dist\SHA256SUMS-v$Version.txt"))
+$assets=@((Join-Path $root "dist\Bugsnax-Installer-v$Version.zip"),(Join-Path $root "dist\Bugsnax-Sound-Pack-v$SoundVersion.zip"),(Join-Path $root "dist\Bugsnax-Mac-Audio-Repair-v$Version.zip"),(Join-Path $root "dist\SHA256SUMS-v$Version.txt"))
 $notes=Join-Path $root "docs\RELEASE_NOTES_v$Version.md"
 foreach ($asset in $assets) { if (-not (Test-Path -LiteralPath $asset)) { throw 'Build the split release first.' } }
 & gh auth status

@@ -67,10 +67,28 @@ $audio=Locate-Game
 Write-Host "Game sound folder: $audio"
 $state=Join-Path $audio '.bugsnax-russian-voice'
 $backup=Join-Path $state 'backup'
+$previous=@{}
+$previousPath=Join-Path $PackagePath 'previous-manifest.tsv'
+if (Test-Path -LiteralPath $previousPath) {
+    foreach ($old in @(Import-Csv -LiteralPath $previousPath -Delimiter "`t")) {
+        if ($old.name -notmatch '^[A-Za-z0-9_]+\.bank$' -or $old.patched_sha256 -notmatch '^[a-f0-9]{64}$') { throw 'Invalid previous manifest.' }
+        $previous[$old.name]=$old
+    }
+}
+function Assert-Compatible($bank,$current) {
+    if ($current -in @($bank.original_sha256,$bank.patched_sha256)) { return }
+    $old=$previous[$bank.name]
+    if ($old -and $old.original_sha256 -eq $bank.original_sha256 -and $old.patched_sha256 -eq $current) {
+        $saved=Join-Path $backup $bank.name
+        if (-not (Test-Path -LiteralPath $saved) -or (Hash $saved) -ne $bank.original_sha256) { throw 'Previous voice pack found but original backup is missing or damaged. Restore using Steam file verification.' }
+        return
+    }
+    throw "Unsupported game version or another audio mod: $($bank.name). No game files changed."
+}
 if ($Action -eq 'Install') {
     foreach ($bank in $banks) {
         $current=Hash (Join-Path $audio $bank.name)
-        if ($current -notin @($bank.original_sha256,$bank.patched_sha256)) { throw "Unsupported game version or another audio mod: $($bank.name). No game files changed." }
+        Assert-Compatible $bank $current
     }
     & (Join-Path $PSScriptRoot 'download_sound.ps1') -PackagePath $PackagePath
 }
@@ -78,7 +96,7 @@ $operations=@()
 foreach ($bank in $banks) {
     $target=Join-Path $audio $bank.name
     $current=Hash $target
-    if ($current -notin @($bank.original_sha256,$bank.patched_sha256)) { throw "Unsupported game version or another audio mod: $($bank.name). No game files changed." }
+    Assert-Compatible $bank $current
     if ($Action -eq 'Check') { continue }
     if ($Action -eq 'Install') {
         $source=Join-Path $PackagePath ('payload\'+$bank.name)
@@ -125,7 +143,7 @@ try {
         $expected=if ($Action -eq 'Install') { $bank.patched_sha256 } else { $bank.original_sha256 }
         if ((Hash (Join-Path $audio $bank.name)) -ne $expected) { throw 'Final verification failed.' }
     }
-    @{action=$Action;version='0.1.1';verified=$true;time=(Get-Date).ToString('o')} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $state 'status.json') -Encoding UTF8
+    @{action=$Action;version='0.1.2';verified=$true;time=(Get-Date).ToString('o')} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $state 'status.json') -Encoding UTF8
     foreach ($file in @(Get-ChildItem -LiteralPath $stage -File)) { Remove-Item -LiteralPath $file.FullName }
     Remove-Item -LiteralPath $stage
     if ($Action -eq 'Install') { Write-Host 'Russian voices installed. Start Bugsnax through Steam. Select Russian in Steam game properties for subtitles.' }

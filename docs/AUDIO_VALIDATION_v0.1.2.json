@@ -1,0 +1,112 @@
+{
+  "version": "0.1.2",
+  "native_pcm": {
+    "verified": true,
+    "banks": 16,
+    "samples": 3993,
+    "runtime": "Windows game FMOD",
+    "macos_runtime_tested": false
+  },
+  "native_event_mapping_checked": 2469,
+  "mixer_speech_check": {
+    "event": "event:/GameAudio/Voiceovers/Scenes/AMinorCelebration/AMinorCelebration_035_Filbo_HeyLetsAll",
+    "spoken_text": "Ха-ха-ха, эй, давайте все сделаем глубокий вдох и...",
+    "key": "2e86c24e241384744b58",
+    "native_decoded_pcm_matches_fitted": true,
+    "native_sample_channels": 1,
+    "native_sample_bits": 16,
+    "mixed": {
+      "rate": 48000,
+      "channels": 2,
+      "width": 2,
+      "frames": 333568,
+      "rms": 2075.3940942921463
+    },
+    "mixed_transcript": "Ха-ха-ха! Эй, давайте все сделаем глубокий вдох и..."
+  },
+  "mixer_asr_similarity": 1.0,
+  "repair_results": [
+    {
+      "bank": "DLCVO.bank",
+      "sha256": "64e7bac17d67944604cbcfb8677994761b9ba4b8605fa73bddec841bf96be47e",
+      "identical_to_rebuilt_bank": true
+    },
+    {
+      "bank": "GameAudio_Beffica.bank",
+      "sha256": "677e104660a8bb0b8bd9bf9bd64e2ff2fd8a4e15caae59394f032f9eb6890c16",
+      "identical_to_rebuilt_bank": true
+    },
+    {
+      "bank": "GameAudio_Clumby.bank",
+      "sha256": "cf523c80ac69372c18357fe63c73d3dffac4d1ef8e2c6dbc6fd8ded2c1c4f3ea",
+      "identical_to_rebuilt_bank": true
+    },
+    {
+      "bank": "GameAudio_Cromdo.bank",
+      "sha256": "20453348f3b5704a3ea43a5e12f3c281a864fd03221e62398c14029edaf8ce2d",
+      "identical_to_rebuilt_bank": true
+    },
+    {
+      "bank": "GameAudio_Eggabell.bank",
+      "sha256": "e96ddfa55ec46f7910298cf9e72ccd6defdf2581e7de4e5aff0121fbe40289bb",
+      "identical_to_rebuilt_bank": true
+    },
+    {
+      "bank": "GameAudio_Filbo.bank",
+      "sha256": "465b1409a60d4be626e99ba38e9dd13f12e9118ae40ff61fb91063ccbec7d5e5",
+      "identical_to_rebuilt_bank": true
+    },
+    {
+      "bank": "GameAudio_Gramble.bank",
+      "sha256": "58cf412e006a83d2e1af4ee43fb0a4218ff92ee628798972c8c4e350947cb195",
+      "identical_to_rebuilt_bank": true
+    },
+    {
+      "bank": "GameAudio_GrumpusVoices.bank",
+      "sha256": "5fcf1699be8f1dec786055a958b963884d8584d692e825d2808b07f5312481c1",
+      "identical_to_rebuilt_bank": true
+    },
+    {
+      "bank": "GameAudio_Lizbert.bank",
+      "sha256": "b16222a871079c06e8d068b0c69bb8884f4b606a7dacc1f68813cad091e5d3a1",
+      "identical_to_rebuilt_bank": true
+    },
+    {
+      "bank": "GameAudio_Triffany.bank",
+      "sha256": "1c2d00b5ac6dadaad0a586f3a717b3f239210983a29e00e21fb49ad935b32126",
+      "identical_to_rebuilt_bank": true
+    },
+    {
+      "bank": "GameAudio_Wambus.bank",
+      "sha256": "9b9e27919533211bc8b05359b55e48935b1edb3fa9bde227d235184ed570d592",
+      "identical_to_rebuilt_bank": true
+    },
+    {
+      "bank": "GameAudio_Wiggle.bank",
+      "sha256": "c625dc4b845d13bd7b0a1c6b54f0e69e711785312894a26d6bf584dfbb1d8276",
+      "identical_to_rebuilt_bank": true
+    },
+    {
+      "bank": "GameAudio_Chandlo.bank",
+      "sha256": "1c82f1e8e16db8638e896ee2748be38523267548bc52b3e1d06990352ba137bc",
+      "identical_to_rebuilt_bank": true
+    },
+    {
+      "bank": "GameAudio_Floofty.bank",
+      "sha256": "7f37134afe60b7a80c918ecb2a4d7bcbd9b619378cb74ef2b01f911893cd8575",
+      "identical_to_rebuilt_bank": true
+    },
+    {
+      "bank": "GameAudio_Shelda.bank",
+      "sha256": "df1d5e7f3deae24b3d7192a6e38a44fe0c550c65771816adabcac51bd8b83045",
+      "identical_to_rebuilt_bank": true
+    },
+    {
+      "bank": "GameAudio_Snorpy.bank",
+      "sha256": "d4ca8a84fb6aeea000d7932ab416aaa121405531722875d88aa1adbe1a478f33",
+      "identical_to_rebuilt_bank": true
+    }
+  ],
+  "interactive_walkthrough": false,
+  "native_mac_playback_test": false
+}

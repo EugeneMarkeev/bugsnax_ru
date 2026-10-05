@@ -7,10 +7,11 @@ from pathlib import Path
 import shutil
 import zipfile
 from build_release import digest
+from fsb5_layout import validate_pcm_bank
 
 ROOT=Path(__file__).resolve().parents[1]
-VERSION='0.1.1'
-SOUND_VERSION='0.1.0'
+VERSION='0.1.2'
+SOUND_VERSION='0.1.1'
 
 def pack(output,entries,prefix=''):
     with zipfile.ZipFile(output,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=6,allowZip64=True) as archive:
@@ -31,6 +32,7 @@ def main():
         quality=json.loads((args.source/'quality_summary.json').read_text(encoding='utf-8'))
         assert quality['ready_to_install']
         banks=json.loads((args.source/'bank_validation.json').read_text(encoding='utf-8'))
+        assert all(b.get('builder_revision')==2 and b.get('native_pcm_verified') for b in banks), 'Native packed-PCM verification required'
         payload=ROOT/'payload';payload.mkdir(exist_ok=True)
         rows=['name\toriginal_sha256\tpatched_sha256\tbytes']
         for bank in banks:
@@ -42,7 +44,10 @@ def main():
             rows.append(f"{name}\t{bank['original_sha256']}\t{bank['patched_sha256']}\t{source.stat().st_size}")
         (ROOT/'manifest.tsv').write_bytes(('\n'.join(rows)+'\n').encode())
     with (ROOT/'manifest.tsv').open(encoding='utf-8',newline='') as f: banks=list(csv.DictReader(f,delimiter='\t'))
-    for bank in banks:assert digest(ROOT/'payload'/bank['name'])==bank['patched_sha256'],bank['name']
+    for bank in banks:
+        path=ROOT/'payload'/bank['name']
+        assert digest(path)==bank['patched_sha256'],bank['name']
+        validate_pcm_bank(path.read_bytes())
     dist=ROOT/'dist';dist.mkdir(exist_ok=True)
     sound=dist/f'Bugsnax-Sound-Pack-v{SOUND_VERSION}.zip'
     pack(sound,['payload/'+b['name'] for b in banks])
@@ -53,10 +58,12 @@ def main():
     meta.update(version=VERSION,sound_pack_version=SOUND_VERSION)
     (ROOT/'release.json').write_text(json.dumps(meta,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     installer=dist/f'Bugsnax-Installer-v{VERSION}.zip'
-    files=['Install.cmd','Uninstall.cmd','Install.command','Uninstall.command','README.md','CHANGELOG.md','manifest.tsv','release.json','sound-pack.tsv','docs/voices.txt']
+    files=['Install.cmd','Uninstall.cmd','Install.command','Uninstall.command','Repair.command','README.md','CHANGELOG.md','manifest.tsv','previous-manifest.tsv','release.json','sound-pack.tsv','docs/voices.txt']
     files += [str(p.relative_to(ROOT)).replace('\\','/') for p in (ROOT/'scripts').glob('*') if p.is_file()]
     pack(installer,files,'Bugsnax-Russian-Voice/')
-    (dist/f'SHA256SUMS-v{VERSION}.txt').write_bytes(f'{digest(installer)}  {installer.name}\n{sound_sha}  {sound.name}\n'.encode())
+    repair=dist/f'Bugsnax-Mac-Audio-Repair-v{VERSION}.zip'
+    pack(repair,['Repair.command','Uninstall.command','README.md','manifest.tsv','previous-manifest.tsv','scripts/macos.sh','scripts/repair_bank.pl'],'Bugsnax-Russian-Voice/')
+    (dist/f'SHA256SUMS-v{VERSION}.txt').write_bytes(f'{digest(installer)}  {installer.name}\n{sound_sha}  {sound.name}\n{digest(repair)}  {repair.name}\n'.encode())
     print(f'Installer: {installer.stat().st_size} bytes; voices: {sound.stat().st_size/1024**2:.1f} MiB',flush=True)
 
 if __name__=='__main__':main()

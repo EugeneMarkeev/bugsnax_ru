@@ -4,7 +4,8 @@ set -euo pipefail
 ROOT="${BUGSNAX_PACKAGE_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 ACTION="${1:-install}"
 GAME="${2:-}"
-case "$ACTION" in install|uninstall|check) ;; *) echo 'Use install, uninstall or check.' >&2; exit 1;; esac
+case "$ACTION" in install|uninstall|check|repair) ;; *) echo 'Use install, uninstall, check or repair.' >&2; exit 1;; esac
+if [ "$ACTION" = repair ]; then command -v perl >/dev/null || { echo 'Perl is unavailable. Use the complete v0.1.2 installer.' >&2; exit 1; }; fi
 fail() { printf '%s\n' "$*" >&2; exit 1; }
 hash() { shasum -a 256 "$1" | awk '{print $1}'; }
 find_audio() {
@@ -47,7 +48,15 @@ while IFS="$TAB" read -r name original patched bytes; do
     [[ "$name" =~ ^[A-Za-z0-9_]+\.bank$ ]] || fail 'Invalid bank name.'
     [[ "$original" =~ ^[a-f0-9]{64}$ && "$patched" =~ ^[a-f0-9]{64}$ ]] || fail 'Invalid manifest checksum.'
     current="$(hash "$AUDIO/$name")"
-    [ "$current" = "$original" ] || [ "$current" = "$patched" ] || fail "Unsupported game version or another audio mod: $name. No game files changed."
+    if [ "$ACTION" = repair ] && [ "$current" = "$original" ]; then fail 'Original game voices found. Use Install.command to install Russian voices.'; fi
+    if [ "$current" != "$original" ] && [ "$current" != "$patched" ]; then
+        legacy=''
+        if [ -f "$ROOT/previous-manifest.tsv" ]; then
+            legacy="$(awk -F '\t' -v bank="$name" -v stock="$original" '$1==bank && $2==stock {print $3}' "$ROOT/previous-manifest.tsv")"
+        fi
+        [[ "$legacy" =~ ^[a-f0-9]{64}$ ]] && [ "$current" = "$legacy" ] || fail "Unsupported game version or another audio mod: $name. No game files changed."
+        [ -f "$BACKUP/$name" ] && [ "$(hash "$BACKUP/$name")" = "$original" ] || fail 'Previous voice pack found but original backup is missing or damaged. Restore using Steam file verification.'
+    fi
     if [ "$ACTION" = uninstall ] && [ "$current" != "$original" ]; then
         [ -f "$BACKUP/$name" ] && [ "$(hash "$BACKUP/$name")" = "$original" ] || fail 'Original backup is missing or damaged. Restore the game using Steam file verification.'
     fi
@@ -91,7 +100,7 @@ STAGE="$(mktemp -d "$STATE/transaction.XXXXXX")"
 while IFS="$TAB" read -r name original patched bytes; do
     [ "$name" = name ] && continue
     current="$(hash "$AUDIO/$name")"
-    if [ "$ACTION" = install ]; then desired="$patched"; source="$ROOT/payload/$name"; else desired="$original"; source="$BACKUP/$name"; fi
+    if [ "$ACTION" = install ] || [ "$ACTION" = repair ]; then desired="$patched"; source="$ROOT/payload/$name"; else desired="$original"; source="$BACKUP/$name"; fi
     [ "$current" != "$desired" ] || continue
     if [ "$ACTION" = install ] && [ ! -f "$BACKUP/$name" ]; then
         [ "$current" = "$original" ] || fail 'Game files changed during installation.'
@@ -99,7 +108,9 @@ while IFS="$TAB" read -r name original patched bytes; do
         [ "$(hash "$BACKUP/$name")" = "$original" ] || fail 'Original backup checksum mismatch.'
     fi
     cp "$AUDIO/$name" "$STAGE/$name.old"
-    cp "$source" "$STAGE/$name.new"
+    if [ "$ACTION" = repair ]; then
+        perl "$(dirname "$0")/repair_bank.pl" "$AUDIO/$name" "$STAGE/$name.new"
+    else cp "$source" "$STAGE/$name.new"; fi
     [ "$(hash "$STAGE/$name.new")" = "$desired" ] || fail 'Staged file checksum mismatch.'
 done < "$ROOT/manifest.tsv"
 while IFS="$TAB" read -r name original patched bytes; do
@@ -109,11 +120,11 @@ while IFS="$TAB" read -r name original patched bytes; do
         CHANGED+=("$name")
         mv -f "$STAGE/$name.new" "$AUDIO/$name"
     fi
-    if [ "$ACTION" = install ]; then desired="$patched"; else desired="$original"; fi
+    if [ "$ACTION" = install ] || [ "$ACTION" = repair ]; then desired="$patched"; else desired="$original"; fi
     [ "$(hash "$AUDIO/$name")" = "$desired" ] || fail 'Final verification failed.'
 done < "$ROOT/manifest.tsv"
-printf 'version=0.1.1\naction=%s\nverified=true\n' "$ACTION" > "$STATE/status.txt"
+printf 'version=0.1.2\naction=%s\nverified=true\n' "$ACTION" > "$STATE/status.txt"
 COMMITTED=1
-if [ "$ACTION" = install ]; then
+if [ "$ACTION" = install ] || [ "$ACTION" = repair ]; then
     echo 'Russian voices installed. Start Bugsnax through Steam. Select Russian in Steam game properties for subtitles.'
 else echo 'Original voices restored.'; fi
