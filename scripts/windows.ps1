@@ -67,6 +67,13 @@ $audio=Locate-Game
 Write-Host "Game sound folder: $audio"
 $state=Join-Path $audio '.bugsnax-russian-voice'
 $backup=Join-Path $state 'backup'
+if ($Action -eq 'Install') {
+    foreach ($bank in $banks) {
+        $current=Hash (Join-Path $audio $bank.name)
+        if ($current -notin @($bank.original_sha256,$bank.patched_sha256)) { throw "Unsupported game version or another audio mod: $($bank.name). No game files changed." }
+    }
+    & (Join-Path $PSScriptRoot 'download_sound.ps1') -PackagePath $PackagePath
+}
 $operations=@()
 foreach ($bank in $banks) {
     $target=Join-Path $audio $bank.name
@@ -118,7 +125,7 @@ try {
         $expected=if ($Action -eq 'Install') { $bank.patched_sha256 } else { $bank.original_sha256 }
         if ((Hash (Join-Path $audio $bank.name)) -ne $expected) { throw 'Final verification failed.' }
     }
-    @{action=$Action;version='0.1.0';verified=$true;time=(Get-Date).ToString('o')} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $state 'status.json') -Encoding UTF8
+    @{action=$Action;version='0.1.1';verified=$true;time=(Get-Date).ToString('o')} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $state 'status.json') -Encoding UTF8
     foreach ($file in @(Get-ChildItem -LiteralPath $stage -File)) { Remove-Item -LiteralPath $file.FullName }
     Remove-Item -LiteralPath $stage
     if ($Action -eq 'Install') { Write-Host 'Russian voices installed. Start Bugsnax through Steam. Select Russian in Steam game properties for subtitles.' }

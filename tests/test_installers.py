@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -64,6 +65,44 @@ class InstallerContract:
         self.assertNotEqual(self.run_action('install').returncode,0)
         self.assert_original()
 
+    def make_sound_archive(self,corrupt=False):
+        archive=self.package/'Bugsnax-Sound-Pack-v0.1.0.zip'
+        with zipfile.ZipFile(archive,'w') as z:
+            for path in (self.package/'payload').glob('*.bank'):z.write(path,'payload/'+path.name)
+        checksum=sha(archive.read_bytes()) if not corrupt else '0'*64
+        (self.package/'sound-pack.tsv').write_bytes(('filename\turl\tsha256\n'+archive.name+'\thttps://github.com/EugeneMarkeev/bugsnax_ru/releases/download/v0.1.1/'+archive.name+'\t'+checksum+'\n').encode())
+        shutil.rmtree(self.package/'payload')
+        return archive
+
+    def test_offline_sound_pack_install(self):
+        self.make_sound_archive()
+        self.assertEqual(self.run_action('install').returncode,0)
+        for name,data in self.originals.items():self.assertEqual((self.audio/name).read_bytes(),b'russian '+data)
+        self.assertEqual(self.run_action('uninstall').returncode,0)
+        self.assert_original()
+
+    def test_bad_sound_pack_checksum(self):
+        self.make_sound_archive(corrupt=True)
+        self.assertNotEqual(self.run_action('install').returncode,0)
+        self.assert_original()
+
+    def test_uninstall_without_audio_files(self):
+        self.assertEqual(self.run_action('install').returncode,0)
+        shutil.rmtree(self.package/'payload')
+        self.assertEqual(self.run_action('uninstall').returncode,0)
+        self.assert_original()
+
+    def test_download_resume_path(self):
+        archive=self.make_sound_archive()
+        server=self.base/'server.zip'
+        shutil.move(archive,server)
+        Path(str(archive)+'.partial').write_bytes(server.read_bytes()[:20])
+        result=self.run_download(server)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertEqual(archive.read_bytes(),server.read_bytes())
+        self.assertEqual(self.run_action('uninstall').returncode,0)
+        self.assert_original()
+
     def test_corrupt_backup_blocks_uninstall(self):
         self.assertEqual(self.run_action('install').returncode,0)
         (self.audio/'.bugsnax-russian-voice/backup/GameAudio_Wambus.bank').write_bytes(b'damaged backup')
@@ -83,6 +122,20 @@ class InstallerContract:
 
 @unittest.skipUnless(os.name=='nt','Windows only')
 class WindowsInstaller(InstallerContract,unittest.TestCase):
+    def run_download(self,server):
+        quote=lambda path:"'"+str(path).replace("'","''")+"'"
+        script=self.base/'mock download.ps1'
+        script.write_text('''function curl.exe {
+    $items=@($args); $at=[Array]::IndexOf($items,'--output'); $resume=[Array]::IndexOf($items,'--continue-at')
+    if ($at -lt 0 -or $resume -lt 0 -or $items[$resume+1] -ne '-') { throw 'Missing resume option' }
+    $out=$items[$at+1]
+    if ((Get-Item -LiteralPath $out).Length -ne 20) { throw 'Partial download not reused' }
+    Copy-Item -LiteralPath $env:TEST_PACK_SOURCE -Destination $out -Force
+    $global:LASTEXITCODE=0
+}
+'''+'& '+quote(ROOT/'scripts/windows.ps1')+' -Action Install -GamePath '+quote(self.game)+' -PackagePath '+quote(self.package)+' -NoDialog\n',encoding='utf-8-sig')
+        return subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',str(script)],env=dict(os.environ,TEST_PACK_SOURCE=str(server)),capture_output=True,text=True,encoding='utf-8',errors='replace')
+
     def run_action(self,action):
         result=subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',str(ROOT/'scripts/windows.ps1'),
             '-Action',action,'-GamePath',str(self.game),'-PackagePath',str(self.package),'-NoDialog'],capture_output=True,text=True,encoding='utf-8',errors='replace')
@@ -106,6 +159,32 @@ class WindowsInstaller(InstallerContract,unittest.TestCase):
 
 @unittest.skipUnless(os.name!='nt' or os.environ.get('BUGSNAX_TEST_WSL'),'Set BUGSNAX_TEST_WSL to a WSL distribution to test shell installer')
 class ShellInstaller(InstallerContract,unittest.TestCase):
+    def run_download(self,server):
+        fake=self.base/'download bin';fake.mkdir()
+        curl=fake/'curl'
+        curl.write_text('''#!/bin/bash
+set -eu
+out=''; resume=0
+while [ "$#" -gt 0 ]; do
+ case "$1" in
+  --output) out="$2"; shift 2;;
+  --continue-at) [ "$2" = - ]; resume=1; shift 2;;
+  *) shift;;
+ esac
+done
+[ "$resume" = 1 ]
+[ "$(wc -c < "$out" | tr -d ' ')" = 20 ]
+cp "$TEST_PACK_SOURCE" "$out"
+''',newline='\n')
+        if os.name=='nt':
+            subprocess.run(['wsl.exe','-d',os.environ['BUGSNAX_TEST_WSL'],'--','chmod','+x',linux_path(curl)],check=True)
+            args=['wsl.exe','-d',os.environ['BUGSNAX_TEST_WSL'],'--','env','BUGSNAX_PACKAGE_ROOT='+linux_path(self.package),
+                  'TEST_PACK_SOURCE='+linux_path(server),'PATH='+linux_path(fake)+':/usr/local/bin:/usr/bin:/bin','bash',linux_path(ROOT/'scripts/macos.sh'),'install',linux_path(self.game)]
+        else:
+            curl.chmod(0o755)
+            args=['env','BUGSNAX_PACKAGE_ROOT='+str(self.package),'TEST_PACK_SOURCE='+str(server),'PATH='+str(fake)+':/usr/local/bin:/usr/bin:/bin','bash',str(ROOT/'scripts/macos.sh'),'install',str(self.game)]
+        return subprocess.run(args,capture_output=True,text=True,encoding='utf-8',errors='replace')
+
     def run_action(self,action):
         if os.name=='nt':
             args=['wsl.exe','-d',os.environ['BUGSNAX_TEST_WSL'],'--','env','BUGSNAX_PACKAGE_ROOT='+linux_path(self.package),
@@ -128,7 +207,7 @@ class ShellInstaller(InstallerContract,unittest.TestCase):
         # Fail only the second live-bank rename after the first has succeeded.
         fake=self.base/'bin';fake.mkdir()
         wrapper=fake/'mv'
-        wrapper.write_text('#!/bin/bash\ncase "$*" in *GameAudio_Wambus.bank.new*) exit 1;; esac\nexec /bin/mv "$@"\n')
+        wrapper.write_text('#!/bin/bash\ncase "$*" in *GameAudio_Wambus.bank.new*) exit 1;; esac\nexec /bin/mv "$@"\n',newline='\n')
         if os.name=='nt':
             subprocess.run(['wsl.exe','-d',os.environ['BUGSNAX_TEST_WSL'],'--','chmod','+x',linux_path(wrapper)],check=True)
             args=['wsl.exe','-d',os.environ['BUGSNAX_TEST_WSL'],'--','env','BUGSNAX_PACKAGE_ROOT='+linux_path(self.package),

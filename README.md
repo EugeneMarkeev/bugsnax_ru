@@ -2,7 +2,8 @@
 
 [![Проверки установщиков](https://github.com/EugeneMarkeev/bugsnax_ru/actions/workflows/tests.yml/badge.svg)](https://github.com/EugeneMarkeev/bugsnax_ru/actions/workflows/tests.yml)
 
-**[Скачать озвучку для Windows и Mac](https://github.com/EugeneMarkeev/bugsnax_ru/releases/latest/download/Bugsnax-Russian-Voice-v0.1.0.zip)**
+**[Скачать маленький установщик для Windows и Mac](https://github.com/EugeneMarkeev/bugsnax_ru/releases/latest/download/Bugsnax-Installer-v0.1.1.zip)**
+· [Пакет озвучки отдельно](https://github.com/EugeneMarkeev/bugsnax_ru/releases/download/v0.1.1/Bugsnax-Sound-Pack-v0.1.0.zip)
 · [Все релизы](https://github.com/EugeneMarkeev/bugsnax_ru/releases)
 · [Сообщить об ошибке](https://github.com/EugeneMarkeev/bugsnax_ru/issues/new/choose)
 
@@ -12,14 +13,22 @@
 
 ## Установка
 
-1. [Скачайте архив озвучки](https://github.com/EugeneMarkeev/bugsnax_ru/releases/latest/download/Bugsnax-Russian-Voice-v0.1.0.zip) и распакуйте.
-   Архивы **Source code** содержат только установщик, без озвучки.
+1. [Скачайте маленький установщик](https://github.com/EugeneMarkeev/bugsnax_ru/releases/latest/download/Bugsnax-Installer-v0.1.1.zip) и распакуйте.
 2. Закройте Bugsnax.
 3. Windows: дважды нажмите **Install.cmd**. Mac: **Install.command**.
+   Установщик сам скачает пакет озвучки (около 1,3 ГБ), проверит его и распакует.
+   После обрыва запустите его снова — скачивание продолжится.
 4. Запустите игру обычным способом через Steam. Для русского интерфейса и
    субтитров выберите русский язык в свойствах игры в Steam.
 
 Python, Qwen, Git и отдельная видеокарта для установки и игры не нужны.
+
+Для установки без интернета [скачайте пакет звуков отдельно](https://github.com/EugeneMarkeev/bugsnax_ru/releases/download/v0.1.1/Bugsnax-Sound-Pack-v0.1.0.zip)
+и положите ZIP рядом с `Install.cmd`/`Install.command` или в родительскую папку.
+Звуковой ZIP распаковывать вручную не нужно. При наличии ZIP установщик
+использует его вместо скачивания. Пакет одинаков для Windows и Mac.
+Удаление озвучки не требует интернета или пакета звуков.
+
 Установщик сам ищет игру в библиотеках Steam. Если не найдёт — предложит
 выбрать папку: Steam → Bugsnax → Управление → Просмотреть локальные файлы.
 Выберите папку Bugsnax, приложение Bugsnax.app или папку звуковых банков.
@@ -49,8 +58,8 @@ macOS. Установка выполняется с правами текуще�
 о несовместимости нужен обновлённый релиз мода. Мод конфликтует с другими заменами
 этих же звуковых банков. Сохранения игры установщик не изменяет.
 
-Для распакованного релиза нужно около 1.81 GiB; установщик временно создаёт
-копии изменяемых файлов. Желательно иметь 5 GiB свободного места на диске игры.
+Для скачанного и распакованного пакета нужно около 3.2 GiB в папке установщика;
+желательно иметь ещё 5 GiB свободного места на диске игры для временных копий.
 Перед заменой проверяются все входные файлы, затем создаются резервные копии
 и временные файлы. При ошибке замены выполняется откат изменённых банков.
 
@@ -65,7 +74,7 @@ macOS. Установка выполняется с правами текуще�
 Сборка архива из проверенного набора:
 
 ```text
-python tools/build_release.py --source /path/to/campaign
+python tools/build_split_release.py --source /path/to/campaign
 ```
 
 Проверки установщика на временных файлах:
@@ -87,9 +96,10 @@ bash scripts/macos.sh check
 Можно задать путь вручную: Windows `-GamePath "..."`; Mac — второй аргумент
 после `install`, `uninstall` или `check`.
 
-Для публикации создайте GitHub-репозиторий, отправьте код, создайте релиз
-`v0.1.0`, прикрепите ZIP из `dist/` и файл `.sha256`. Пользователю нужна кнопка
-скачивания релиза, а не `git clone`. Поддержка Steam Workshop для Bugsnax
+Для публикации создайте релиз `v0.1.1`, прикрепите установщик, звуковой ZIP
+и `SHA256SUMS-v0.1.1.txt` из `dist/`. Адрес и контрольная сумма звукового пакета
+закреплены в `sound-pack.tsv`. Пользователю достаточно маленького установщика.
+Поддержка Steam Workshop для Bugsnax
 не заявлена: этот пакет распространяется отдельно от Steam.
 
 Подробное описание закреплённых голосов: [docs/voices.txt](docs/voices.txt).

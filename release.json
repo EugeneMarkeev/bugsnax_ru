@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "steam_app_id": 674140,
   "reference_windows_build": 25460845,
   "fragments": 2469,
@@ -7,5 +7,6 @@
   "banks": 16,
   "windows": "native audio validated",
   "macos": "experimental; requires matching original bank checksums and Mac playback test",
-  "validation": "Automated transcription, waveform/PCM/hash checks and native FMOD playback; no complete interactive walkthrough."
+  "validation": "Automated transcription, waveform/PCM/hash checks and native FMOD playback; no complete interactive walkthrough.",
+  "sound_pack_version": "0.1.0"
 }

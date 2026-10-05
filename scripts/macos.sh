@@ -48,15 +48,19 @@ while IFS="$TAB" read -r name original patched bytes; do
     [[ "$original" =~ ^[a-f0-9]{64}$ && "$patched" =~ ^[a-f0-9]{64}$ ]] || fail 'Invalid manifest checksum.'
     current="$(hash "$AUDIO/$name")"
     [ "$current" = "$original" ] || [ "$current" = "$patched" ] || fail "Unsupported game version or another audio mod: $name. No game files changed."
-    if [ "$ACTION" = install ]; then
-        [ -f "$ROOT/payload/$name" ] || fail 'Audio is missing. Download the release ZIP, not GitHub Source code.'
-        [ "$(hash "$ROOT/payload/$name")" = "$patched" ] || fail "Damaged release file: $name"
-    elif [ "$ACTION" = uninstall ] && [ "$current" != "$original" ]; then
+    if [ "$ACTION" = uninstall ] && [ "$current" != "$original" ]; then
         [ -f "$BACKUP/$name" ] && [ "$(hash "$BACKUP/$name")" = "$original" ] || fail 'Original backup is missing or damaged. Restore the game using Steam file verification.'
     fi
     if [ -f "$BACKUP/$name" ]; then [ "$(hash "$BACKUP/$name")" = "$original" ] || fail "Damaged backup: $name"; fi
 done < "$ROOT/manifest.tsv"
 [ "$COUNT" -gt 0 ] || fail 'Empty bank manifest.'
+if [ "$ACTION" = install ]; then
+    /bin/bash "$(dirname "$0")/download_sound.sh" "$ROOT"
+    while IFS="$TAB" read -r name original patched bytes; do
+        [ "$name" = name ] && continue
+        [ "$(hash "$ROOT/payload/$name")" = "$patched" ] || fail "Damaged sound pack file: $name"
+    done < "$ROOT/manifest.tsv"
+fi
 if [ "$ACTION" = check ]; then echo 'Compatible sound banks. No changes made.'; exit 0; fi
 mkdir -p "$BACKUP"
 mkdir "$STATE/lock" || fail 'Another installer is running, or a stale lock remains. Check before retrying.'
@@ -108,7 +112,7 @@ while IFS="$TAB" read -r name original patched bytes; do
     if [ "$ACTION" = install ]; then desired="$patched"; else desired="$original"; fi
     [ "$(hash "$AUDIO/$name")" = "$desired" ] || fail 'Final verification failed.'
 done < "$ROOT/manifest.tsv"
-printf 'version=0.1.0\naction=%s\nverified=true\n' "$ACTION" > "$STATE/status.txt"
+printf 'version=0.1.1\naction=%s\nverified=true\n' "$ACTION" > "$STATE/status.txt"
 COMMITTED=1
 if [ "$ACTION" = install ]; then
     echo 'Russian voices installed. Start Bugsnax through Steam. Select Russian in Steam game properties for subtitles.'
