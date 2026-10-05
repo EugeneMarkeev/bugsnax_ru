@@ -6,10 +6,12 @@ $notes=Join-Path $root "docs\RELEASE_NOTES_v$Version.md"
 foreach ($asset in $assets) { if (-not (Test-Path -LiteralPath $asset)) { throw 'Build the split release first.' } }
 & gh auth status
 if ($LASTEXITCODE -ne 0) { throw 'Complete gh auth login before publishing.' }
-& gh repo edit $Repository --description 'Русская озвучка Bugsnax: 2469 фрагментов, 14 голосов, установка для Windows и macOS' --enable-issues --enable-wiki=false
+& gh repo edit $Repository --description 'Russian Bugsnax voices: 2469 clips, 14 voices; Windows/macOS installers' --enable-issues --enable-wiki=false
 if ($LASTEXITCODE -ne 0) { throw 'Could not update repository settings.' }
-& gh release view "v$Version" --repo $Repository *> $null
-if ($LASTEXITCODE -ne 0) {
+$releases=& gh release list --repo $Repository --limit 100 --json tagName
+if ($LASTEXITCODE -ne 0) { throw 'Could not list existing releases.' }
+$present=@(($releases | ConvertFrom-Json) | Where-Object { $_.tagName -eq "v$Version" }).Count -gt 0
+if (-not $present) {
     & gh release create "v$Version" --repo $Repository --verify-tag --draft --title "v$Version - Russian voices: separate installer and sound pack" --notes-file $notes
     if ($LASTEXITCODE -ne 0) { throw 'Could not create the draft release.' }
 }
