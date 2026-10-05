@@ -213,7 +213,7 @@ cp "$TEST_PACK_SOURCE" "$out"
                   'TEST_PACK_SOURCE='+linux_path(server),'PATH='+linux_path(fake)+':/usr/local/bin:/usr/bin:/bin','bash',linux_path(ROOT/'scripts/macos.sh'),'install',linux_path(self.game)]
         else:
             curl.chmod(0o755)
-            args=['env','BUGSNAX_PACKAGE_ROOT='+str(self.package),'TEST_PACK_SOURCE='+str(server),'PATH='+str(fake)+':/usr/local/bin:/usr/bin:/bin','bash',str(ROOT/'scripts/macos.sh'),'install',str(self.game)]
+            args=['env','BUGSNAX_PACKAGE_ROOT='+str(self.package),'TEST_PACK_SOURCE='+str(server),'PATH='+str(fake)+':/usr/local/bin:/usr/bin:/bin','/bin/bash',str(ROOT/'scripts/macos.sh'),'install',str(self.game)]
         return subprocess.run(args,capture_output=True,text=True,encoding='utf-8',errors='replace')
 
     def run_action(self,action):
@@ -221,7 +221,7 @@ cp "$TEST_PACK_SOURCE" "$out"
             args=['wsl.exe','-d',os.environ['BUGSNAX_TEST_WSL'],'--','env','BUGSNAX_PACKAGE_ROOT='+linux_path(self.package),
                   'bash',linux_path(ROOT/'scripts/macos.sh'),action,linux_path(self.game)]
         else:
-            args=['env','BUGSNAX_PACKAGE_ROOT='+str(self.package),'bash',str(ROOT/'scripts/macos.sh'),action,str(self.game)]
+            args=['env','BUGSNAX_PACKAGE_ROOT='+str(self.package),'/bin/bash',str(ROOT/'scripts/macos.sh'),action,str(self.game)]
         result=subprocess.run(args,capture_output=True,text=True,encoding='utf-8',errors='replace')
         if action=='install' and result.returncode:print(result.stdout+result.stderr)
         return result
@@ -270,7 +270,7 @@ cp "$TEST_PACK_SOURCE" "$out"
                   'PATH='+linux_path(fake)+':/usr/local/bin:/usr/bin:/bin','bash',linux_path(ROOT/'scripts/macos.sh'),'install',linux_path(self.game)]
         else:
             wrapper.chmod(0o755)
-            args=['env','BUGSNAX_PACKAGE_ROOT='+str(self.package),'PATH='+str(fake)+':/usr/local/bin:/usr/bin:/bin','bash',str(ROOT/'scripts/macos.sh'),'install',str(self.game)]
+            args=['env','BUGSNAX_PACKAGE_ROOT='+str(self.package),'PATH='+str(fake)+':/usr/local/bin:/usr/bin:/bin','/bin/bash',str(ROOT/'scripts/macos.sh'),'install',str(self.game)]
         self.assertNotEqual(subprocess.run(args,capture_output=True).returncode,0)
         self.assertTrue(list((self.audio/'.bugsnax-russian-voice').glob('transaction.*/GameAudio_Filbo.bank.old')))
         self.assert_original()
