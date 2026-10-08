@@ -1,12 +1,12 @@
 {
-  "version": "0.1.2",
+  "version": "0.2.0",
   "steam_app_id": 674140,
   "reference_windows_build": 25460845,
-  "fragments": 2469,
-  "voices": 14,
+  "fragments": 3545,
+  "voices": 15,
   "banks": 16,
   "windows": "FSB5 channel/offset fix; native decoded PCM and mixer output checked",
   "macos": "experimental; requires matching original bank checksums and Mac playback test",
-  "validation": "Per-sample native FMOD decoded PCM comparison and recorded mixer speech check; no complete walkthrough or native Mac playback test.",
-  "sound_pack_version": "0.1.1"
+  "validation": "Automated transcription, waveform/PCM/hash checks and native FMOD playback; no complete interactive walkthrough.",
+  "sound_pack_version": "0.2.0"
 }

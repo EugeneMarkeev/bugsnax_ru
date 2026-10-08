@@ -1,0 +1,120 @@
+{
+  "version": "0.2.0",
+  "native_pcm": {
+    "verified": true,
+    "banks": 16,
+    "samples": 3993,
+    "runtime": "Windows game FMOD",
+    "macos_runtime_tested": false
+  },
+  "native_event_mapping_checked": 3435,
+  "physical_sample_fragments": 110,
+  "mixer_speech_check": {
+    "event": "event:/GameAudio/Voiceovers/Quests/MeetingFilbo/MeetingFilbo_003_Filbo_IWasLooking",
+    "spoken_text": "Я искал тебя, но, э-э, проголодался и не мог поймать жуконямок, и...",
+    "key": "5f3176e1465f7da4a928",
+    "native_decoded_pcm_matches_fitted": true,
+    "native_sample_channels": 1,
+    "native_sample_bits": 16,
+    "mixed": {
+      "rate": 48000,
+      "channels": 2,
+      "width": 2,
+      "frames": 414976,
+      "rms": 1454.9788716347148
+    },
+    "bank": "GameAudio_Filbo.bank",
+    "bank_sha256": "d50b18d8f81c2b1cb9ff8ee87f6013d75cd49dc84b45a44e98649111290a2832",
+    "scene": "opening",
+    "mixed_transcript": "Я искал тебя, но, э-э, проголодался и не мог поймать жуканямок. И..."
+  },
+  "mixer_asr_similarity": 0.9836065573770492,
+  "interactive_walkthrough": false,
+  "native_mac_playback_test": false,
+  "mixer_scenes": {
+    "opening": {
+      "event": "event:/GameAudio/Voiceovers/Quests/MeetingFilbo/MeetingFilbo_003_Filbo_IWasLooking",
+      "spoken_text": "Я искал тебя, но, э-э, проголодался и не мог поймать жуконямок, и...",
+      "key": "5f3176e1465f7da4a928",
+      "native_decoded_pcm_matches_fitted": true,
+      "native_sample_channels": 1,
+      "native_sample_bits": 16,
+      "mixed": {
+        "rate": 48000,
+        "channels": 2,
+        "width": 2,
+        "frames": 414976,
+        "rms": 1454.9788716347148
+      },
+      "bank": "GameAudio_Filbo.bank",
+      "bank_sha256": "d50b18d8f81c2b1cb9ff8ee87f6013d75cd49dc84b45a44e98649111290a2832",
+      "scene": "opening",
+      "mixed_transcript": "Я искал тебя, но, э-э, проголодался и не мог поймать жуканямок. И..."
+    },
+    "final": {
+      "event": "event:/GameAudio/Voiceovers/Scenes/FinalBattle/BefficaCromdo/BefficaCromdoBattle_032_Beffica_PhewItLooked",
+      "spoken_text": "Фух! Хм! На секунду мне показалось, что все плохо, но я знала, что ты справишься, дружище!",
+      "key": "94534a847b824d8a5184",
+      "native_decoded_pcm_matches_fitted": true,
+      "native_sample_channels": 1,
+      "native_sample_bits": 16,
+      "mixed": {
+        "rate": 48000,
+        "channels": 2,
+        "width": 2,
+        "frames": 343808,
+        "rms": 2367.9078507060512
+      },
+      "bank": "GameAudio_Beffica.bank",
+      "bank_sha256": "a99d1661a335c6d78ddb46f2ff4536beacdfc196834d1070406eb0d819e3ef5e",
+      "scene": "final",
+      "mixed_transcript": "Фух! Хм, на секунду мне показалось, что все плохо, но я знала, что ты справишься, дружище!",
+      "asr_similarity": 1.0
+    },
+    "dlc": {
+      "event": "event:/GameAudio/Voiceovers/DLC/PlayerHut/MovingUp_009_Chandlo",
+      "spoken_text": "Это точно, чел, особенно когда мы тебе ЕЩЕ БОЛЬШЕ НИШТЯКОВ отправим!",
+      "key": "d12d305fe0dd2232174c",
+      "native_decoded_pcm_matches_fitted": true,
+      "native_sample_channels": 1,
+      "native_sample_bits": 16,
+      "mixed": {
+        "rate": 48000,
+        "channels": 2,
+        "width": 2,
+        "frames": 308480,
+        "rms": 4043.2119950052324
+      },
+      "bank": "DLCVO.bank",
+      "bank_sha256": "980e43b1918b02e5870444c5642b96028429b7ca8403a2a5e04f5e84ce4391e3",
+      "scene": "dlc",
+      "mixed_transcript": "Это точно, Чел! Особенно, когда мы тебе ещи больше ништяков отправим!",
+      "asr_similarity": 0.9846153846153847
+    },
+    "jamfoot": {
+      "event": "event:/GameAudio/Voiceovers/Scenes/ClumbysOfficeEpilogue/ClumbysOfficeEpilogue_Voice_VeryWellWeWill",
+      "spoken_text": "Хорошо... Надо будет за ними присматривать...",
+      "key": "255fb44fb05449650fc4",
+      "native_decoded_pcm_matches_fitted": true,
+      "native_sample_channels": 1,
+      "native_sample_bits": 16,
+      "mixed": {
+        "rate": 48000,
+        "channels": 2,
+        "width": 2,
+        "frames": 288000,
+        "rms": 349.0357698805972
+      },
+      "bank": "GameAudio_Clumby.bank",
+      "bank_sha256": "6ae26d41a909f4f71be603144194836643493d9e09b119b1accedbcc04258b74",
+      "scene": "jamfoot",
+      "mixed_transcript": "Хорошо, надо будет за ними присматривать.",
+      "asr_similarity": 1.0
+    }
+  },
+  "scope": {
+    "subtitle_fragments": 3435,
+    "additional_spoken_sample_fragments": 110,
+    "preserved_original_audio": "Songs, creature calls, nonverbal effects, unclear murmuring and unused trailer material."
+  }
+}
