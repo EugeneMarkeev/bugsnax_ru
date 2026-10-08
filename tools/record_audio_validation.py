@@ -18,6 +18,17 @@ def main():
     assert quality['ready_to_install'] and native['banks']==len(banks)
     events=load('studio_validation.json');assert len(events)==quality['speech_files'] and all(e['playing'] or (e.get('sample_only') and e.get('mapping_verified')) for e in events)
     report={'version':args.version,'native_pcm':native,'native_event_mapping_checked':sum(e['playing'] for e in events),'physical_sample_fragments':sum(bool(e.get('sample_only')) for e in events),'mixer_speech_check':mixed,'mixer_asr_similarity':ratio,'interactive_walkthrough':False,'native_mac_playback_test':False}
+    scenes={'opening':mixed}
+    for scene in ('final','dlc','jamfoot'):
+        check=load(f'native_playback_check_{scene}/report.json')
+        check.pop('capture',None)
+        similarity=difflib.SequenceMatcher(None,normalize(check['spoken_text']),normalize(check['mixed_transcript'])).ratio()
+        assert check['native_decoded_pcm_matches_fitted'] and similarity>.9
+        scenes[scene]=dict(check,asr_similarity=similarity)
+    report['mixer_scenes']=scenes
+    report['scope']={'subtitle_fragments':quality['speech_files']-quality.get('physical_sample_fragments',0),
+                     'additional_spoken_sample_fragments':quality.get('physical_sample_fragments',0),
+                     'preserved_original_audio':'Songs, creature calls, nonverbal effects, unclear murmuring and unused trailer material.'}
     (ROOT/f'docs/AUDIO_VALIDATION_v{args.version}.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('Validated packed PCM, real mixer speech and event mappings.')
 if __name__=='__main__':main()
