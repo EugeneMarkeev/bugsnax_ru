@@ -52,7 +52,7 @@ while IFS="$TAB" read -r name original patched bytes; do
     if [ "$current" != "$original" ] && [ "$current" != "$patched" ]; then
         legacy=''
         if [ -f "$ROOT/previous-manifest.tsv" ]; then
-            legacy="$(awk -F '\t' -v bank="$name" -v stock="$original" '$1==bank && $2==stock {print $3}' "$ROOT/previous-manifest.tsv")"
+            legacy="$(awk -F '\t' -v bank="$name" -v stock="$original" -v current="$current" '$1==bank && $2==stock && $3==current {print $3; exit}' "$ROOT/previous-manifest.tsv")"
         fi
         [[ "$legacy" =~ ^[a-f0-9]{64}$ ]] && [ "$current" = "$legacy" ] || fail "Unsupported game version or another audio mod: $name. No game files changed."
         [ -f "$BACKUP/$name" ] && [ "$(hash "$BACKUP/$name")" = "$original" ] || fail 'Previous voice pack found but original backup is missing or damaged. Restore using Steam file verification.'

@@ -71,6 +71,19 @@ class InstallerContract:
         self.assertEqual(self.run_action('uninstall').returncode,0)
         self.assert_original()
 
+    def test_upgrade_accepts_multiple_known_previous_versions(self):
+        self.prepare_previous_pack()
+        path=self.package/'previous-manifest.tsv'
+        text=path.read_text(encoding='utf-8')
+        # A second historical pack uses the same bank names with other hashes.
+        other=[]
+        for name,data in self.originals.items():other.append(f'{name}\t{sha(data)}\t{sha(b"another old pack "+data)}\t10')
+        path.write_bytes((text+'\n'.join(other)+'\n').encode())
+        result=self.run_action('install')
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertEqual(self.run_action('uninstall').returncode,0)
+        self.assert_original()
+
     def test_previous_pack_without_backup_is_rejected(self):
         self.prepare_previous_pack(backup=False)
         self.assertNotEqual(self.run_action('install').returncode,0)

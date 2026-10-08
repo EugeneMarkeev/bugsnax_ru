@@ -72,13 +72,14 @@ $previousPath=Join-Path $PackagePath 'previous-manifest.tsv'
 if (Test-Path -LiteralPath $previousPath) {
     foreach ($old in @(Import-Csv -LiteralPath $previousPath -Delimiter "`t")) {
         if ($old.name -notmatch '^[A-Za-z0-9_]+\.bank$' -or $old.patched_sha256 -notmatch '^[a-f0-9]{64}$') { throw 'Invalid previous manifest.' }
-        $previous[$old.name]=$old
+        if ($previous.ContainsKey($old.name)) { $previous[$old.name] += @($old) }
+        else { $previous[$old.name]=@($old) }
     }
 }
 function Assert-Compatible($bank,$current) {
     if ($current -in @($bank.original_sha256,$bank.patched_sha256)) { return }
-    $old=$previous[$bank.name]
-    if ($old -and $old.original_sha256 -eq $bank.original_sha256 -and $old.patched_sha256 -eq $current) {
+    $matched=@($previous[$bank.name] | Where-Object { $_ -and $_.original_sha256 -eq $bank.original_sha256 -and $_.patched_sha256 -eq $current })
+    if ($matched.Count -gt 0) {
         $saved=Join-Path $backup $bank.name
         if (-not (Test-Path -LiteralPath $saved) -or (Hash $saved) -ne $bank.original_sha256) { throw 'Previous voice pack found but original backup is missing or damaged. Restore using Steam file verification.' }
         return
