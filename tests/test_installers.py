@@ -1,4 +1,5 @@
 import hashlib
+import json
 import os
 from pathlib import Path
 import shutil
@@ -31,6 +32,7 @@ class InstallerContract:
             (self.audio/name).write_bytes(data);(self.package/'payload'/name).write_bytes(patched)
             rows.append(f'{name}\t{sha(data)}\t{sha(patched)}\t{len(patched)}')
         (self.package/'manifest.tsv').write_text('\n'.join(rows)+'\n',encoding='utf-8')
+        (self.package/'release.json').write_text(json.dumps({'version':'0.2.0'})+'\n',encoding='utf-8')
 
     def assert_original(self):
         for name,data in self.originals.items():self.assertEqual((self.audio/name).read_bytes(),data)
@@ -39,6 +41,11 @@ class InstallerContract:
         self.assertEqual(self.run_action('check').returncode,0)
         self.assert_original()
         for _ in range(2):self.assertEqual(self.run_action('install').returncode,0)
+        status=self.audio/'.bugsnax-russian-voice'
+        if (status/'status.json').exists():
+            self.assertEqual(json.loads((status/'status.json').read_text(encoding='utf-8-sig'))['version'],'0.2.0')
+        else:
+            self.assertIn('version=0.2.0\n',(status/'status.txt').read_text(encoding='utf-8'))
         for name,data in self.originals.items():
             self.assertEqual((self.audio/name).read_bytes(),b'russian '+data)
             self.assertEqual((self.audio/'.bugsnax-russian-voice/backup'/name).read_bytes(),data)

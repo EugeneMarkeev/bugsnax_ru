@@ -4,6 +4,11 @@ set -euo pipefail
 ROOT="${BUGSNAX_PACKAGE_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 ACTION="${1:-install}"
 GAME="${2:-}"
+PACKAGE_VERSION=unknown
+if [ -f "$ROOT/release.json" ]; then
+    PACKAGE_VERSION="$(awk -F '"' '/"version"[[:space:]]*:/ {print $4; exit}' "$ROOT/release.json")"
+    PACKAGE_VERSION="${PACKAGE_VERSION:-unknown}"
+fi
 case "$ACTION" in install|uninstall|check|repair) ;; *) echo 'Use install, uninstall, check or repair.' >&2; exit 1;; esac
 if [ "$ACTION" = repair ]; then command -v perl >/dev/null || { echo 'Perl is unavailable. Use the complete v0.1.2 installer.' >&2; exit 1; }; fi
 fail() { printf '%s\n' "$*" >&2; exit 1; }
@@ -123,7 +128,7 @@ while IFS="$TAB" read -r name original patched bytes; do
     if [ "$ACTION" = install ] || [ "$ACTION" = repair ]; then desired="$patched"; else desired="$original"; fi
     [ "$(hash "$AUDIO/$name")" = "$desired" ] || fail 'Final verification failed.'
 done < "$ROOT/manifest.tsv"
-printf 'version=0.1.2\naction=%s\nverified=true\n' "$ACTION" > "$STATE/status.txt"
+printf 'version=%s\naction=%s\nverified=true\n' "$PACKAGE_VERSION" "$ACTION" > "$STATE/status.txt"
 COMMITTED=1
 if [ "$ACTION" = install ] || [ "$ACTION" = repair ]; then
     echo 'Russian voices installed. Start Bugsnax through Steam. Select Russian in Steam game properties for subtitles.'

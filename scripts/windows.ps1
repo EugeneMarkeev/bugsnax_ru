@@ -6,6 +6,12 @@ param(
 )
 $ErrorActionPreference='Stop'
 [Console]::OutputEncoding=[System.Text.UTF8Encoding]::new()
+$packageVersion='unknown'
+$releaseMetadata=Join-Path $PackagePath 'release.json'
+if (Test-Path -LiteralPath $releaseMetadata) {
+    $metadata=Get-Content -LiteralPath $releaseMetadata -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ($metadata.version) { $packageVersion=[string]$metadata.version }
+}
 function Hash($path) {
     $stream=[System.IO.File]::OpenRead($path)
     $sha=[System.Security.Cryptography.SHA256]::Create()
@@ -144,7 +150,7 @@ try {
         $expected=if ($Action -eq 'Install') { $bank.patched_sha256 } else { $bank.original_sha256 }
         if ((Hash (Join-Path $audio $bank.name)) -ne $expected) { throw 'Final verification failed.' }
     }
-    @{action=$Action;version='0.1.2';verified=$true;time=(Get-Date).ToString('o')} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $state 'status.json') -Encoding UTF8
+    @{action=$Action;version=$packageVersion;verified=$true;time=(Get-Date).ToString('o')} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $state 'status.json') -Encoding UTF8
     foreach ($file in @(Get-ChildItem -LiteralPath $stage -File)) { Remove-Item -LiteralPath $file.FullName }
     Remove-Item -LiteralPath $stage
     if ($Action -eq 'Install') { Write-Host 'Russian voices installed. Start Bugsnax through Steam. Select Russian in Steam game properties for subtitles.' }
